@@ -1,0 +1,55 @@
+testthat::test_that("dashboard filters use local dates, template, category and mode together", {
+  catalog <- data.frame(id = c("summary", "pick"), category = c("Groups", "Selection"))
+  h <- data.frame(template_id = c("summary", "summary", "pick", "summary"),
+                  mode = c("Recall", "Guided", "Recall", "Recall"),
+                  practice_date = c("2025-03-01", "2025-03-01", "2025-03-02", "2025-03-01"),
+                  status = c("pass", "incorrect", "pass", "infrastructure_error"), seconds = c(9, 5, 18, 4))
+  selected <- practice_filter(h, catalog, "Groups", "", "recall", as.Date(c("2025-03-01", "2025-03-02")))
+  testthat::expect_equal(nrow(selected), 1)
+  testthat::expect_equal(practice_metrics(selected)$median_seconds, 9)
+  selected <- practice_filter(h, catalog, "All categories", "summary", "All modes")
+  testthat::expect_equal(practice_metrics(selected)$accuracy, .5)
+  testthat::expect_equal(practice_metrics(selected)$completed, 1)
+  testthat::expect_equal(practice_metrics(selected[0, ])$accuracy, NA_real_)
+})
+
+testthat::test_that("dashboard renders empty states, populated charts and actionable reviews", {
+  catalog <- data.frame(id = "summary", title = "Grouped summaries", category = "Groups")
+  path <- tempfile(fileext = ".sqlite")
+  con <- db_open(path)
+  other_tab <- db_open(path)
+  withr::defer({ db_close(con); db_close(other_tab); unlink(path) })
+  server <- function(input, output, session) {
+    tick <- shiny::reactiveVal(0L)
+    review <- shiny::reactiveVal(NULL)
+    analytics_server(input, output, session, con, catalog, tick, review)
+  }
+  shiny::testServer(server, {
+    session$flushReact()
+    testthat::expect_match(output$home_review_queue$html, "schedule its first review")
+    testthat::expect_match(output$history_graphs$html, "No submissions")
+    t <- Sys.time() - 200000
+    s <- start_session(con, "summary", "Recall", "Sequential", 2L, "summary", 192L, now = t)
+    s <- record_attempt(con, s, "stop()", 0, "runtime_error", 2, now = t + 2)
+    s <- record_attempt(con, s, "correct", 0, "pass", 4, now = t + 4)
+    tick(1L)
+    session$flushReact()
+    testthat::expect_match(output$history_metrics$html, "50%")
+    testthat::expect_match(output$history_by_skill$html, "Grouped summaries")
+    testthat::expect_match(output$history_accomplishments$html, "First repetition completed")
+    testthat::expect_match(output$history_submissions$html, "Runtime error")
+    testthat::expect_match(output$history_submissions$html, "<code>stop\\(\\)</code>")
+    testthat::expect_match(output$history_heatmap$html, "Beginner")
+    testthat::expect_match(output$home_review_queue$html, "Review Grouped summaries")
+    testthat::expect_true(nzchar(output$activity_plot$src))
+    testthat::expect_true(nzchar(output$trend_plot$src))
+    session$setInputs(review_template = "summary")
+    testthat::expect_identical(review(), "summary")
+    s <- advance_session(other_tab, s, "summary", 193L)
+    record_attempt(other_tab, s, "correct again", 0, "pass", 3)
+    session$elapse(10000)
+    testthat::expect_match(output$history_metrics$html, "67%")
+    session$setInputs(history_period = "Custom dates", history_dates = as.Date(c("2020-01-01", "2020-01-31")))
+    testthat::expect_match(output$history_graphs$html, "No submissions")
+  })
+})

@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "options": { "cwd": "${workspaceFolder}" },
+  "tasks": [
+    {
+      "label": "RReps: Launch",
+      "type": "process",
+      "command": "Rscript",
+      "args": ["--vanilla", "run.R"],
+      "windows": {
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/start.ps1", "run.R"]
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "RReps: Restore dependencies",
+      "type": "process",
+      "command": "Rscript",
+      "args": ["--vanilla", "scripts/setup.R"],
+      "windows": {
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/start.ps1", "scripts/setup.R"]
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "RReps: Run tests",
+      "type": "process",
+      "command": "Rscript",
+      "args": ["--vanilla", "tests/testthat.R"],
+      "windows": {
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/start.ps1", "tests/testthat.R"]
+      },
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}
