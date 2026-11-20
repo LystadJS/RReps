@@ -11,11 +11,11 @@ Install R 4.5.3 for the tested environment. Open the repository folder in Positr
 ```powershell
 git clone https://github.com/LystadJS/RReps.git
 cd RReps
-.\scripts\start.ps1 scripts/setup.R
-.\scripts\start.ps1
+.\scripts\start.cmd scripts/setup.R
+.\scripts\start.cmd
 ```
 
-For an existing checkout, start with the setup command. The launcher locates R on PATH, through the Windows registry, or under Program Files. Setup restores the versions in `renv.lock` into `.local-library/` and can reuse installed copies of matching versions. A fresh installation needs access to CRAN. Archived source packages with compiled code require Rtools45 on Windows.
+For an existing checkout, start with the setup command. The native Windows launcher works from Command Prompt or PowerShell and locates R on PATH, through the Windows registry, or under Program Files. Setup restores the versions in `renv.lock` into `.local-library/` and can reuse installed copies of matching versions. A fresh installation needs access to CRAN. Archived source packages with compiled code require Rtools45 on Windows.
 
 The app opens [on localhost](http://127.0.0.1:3838). Stop it with Ctrl+C in the launch terminal. To choose another port, set `$env:RREPS_PORT = "3839"` before launch. Set `$env:RREPS_BROWSER = "0"` to suppress browser launch. On systems with Rscript on PATH, the equivalent commands are:
 
@@ -46,7 +46,7 @@ The library contains 30 templates covering R fundamentals, filtering and selecti
 
 ## Practice in Positron
 
-Open the project folder and use **Tasks: Run Task** in the command palette. The project supplies **RReps: Restore dependencies**, **RReps: Launch**, and **RReps: Run tests**. The terminal commands above work independently of IDE task support.
+Open the project folder. If Positron asks whether you trust the folder, review the checkout and trust it to enable workspace tasks. Choose **Tasks: Run Task** in the command palette. The project supplies **RReps: Restore dependencies**, **RReps: Launch**, and **RReps: Run tests**. The terminal commands above work independently of IDE task support.
 
 During a repetition, switch **Workspace** to **Positron**. The app shows the following commands with the actual exercise directory filled in:
 
@@ -96,6 +96,6 @@ source("run.R")
 | `R/positron.R`, `.vscode/tasks.json` | Per-repetition files and IDE launch tasks |
 | `tests/testthat/`, `.github/workflows/` | Regression, integration, and Windows CI tests |
 
-Run `.\scripts\start.ps1 tests/testthat.R` from PowerShell. The suite exercises real R submissions, reproducible fixtures, alternative answers, false passes, subprocess failures, scheduling, SQLite restarts, and the complete 20-repetition grouped-summary workflow. Tests use disposable data. See the [exercise authoring guide](docs/EXERCISES.md) for a complete template example.
+Run `.\scripts\start.cmd tests/testthat.R` from PowerShell. The suite exercises real R submissions, reproducible fixtures, alternative answers, false passes, subprocess failures, scheduling, SQLite restarts, and the complete 20-repetition grouped-summary workflow. Tests use disposable data. See the [exercise authoring guide](docs/EXERCISES.md) for a complete template example.
 
 Before implementation, the [learnr exercise engine](https://github.com/rstudio/learnr/blob/main/R/exercise.R) and [gradethis grading examples](https://github.com/rstudio/gradethis/blob/main/inst/tutorials/grading-demo/grading-demo.Rmd) provided existing approaches to executable R exercises. RReps uses its own generated fixtures and scheduling rules and relies on [callr](https://github.com/r-lib/callr) for subprocess execution. Released under the [MIT license](LICENSE).

@@ -17,8 +17,8 @@ jobs:
           path: .local-library
           key: rreps-${{ runner.os }}-${{ runner.arch }}-r-4.5.3-${{ hashFiles('renv.lock') }}
       - name: Restore locked packages
-        shell: pwsh
-        run: ./scripts/start.ps1 scripts/setup.R
+        shell: cmd
+        run: scripts\start.cmd scripts/setup.R
       - name: Run the R test suite
-        shell: pwsh
-        run: ./scripts/start.ps1 tests/testthat.R
+        shell: cmd
+        run: scripts\start.cmd tests/testthat.R
