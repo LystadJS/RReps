@@ -9,8 +9,12 @@ testthat::test_that("the library covers every category and all templates have ru
   testthat::expect_true(all(vapply(split(catalog$difficulty, catalog$category)[required],
                                    function(x) all(1:3 %in% x), logical(1))))
   for (id in catalog$id) {
+    instructions <- character(3L)
+    solutions <- character(3L)
     for (level in 1:3) {
       ex <- make_exercise(id, 87123L, level)
+      instructions[level] <- ex$instructions
+      solutions[level] <- ex$solution
       testthat::expect_identical(ex, make_exercise(id, 87123L, level))
       testthat::expect_identical(ex$inputs, ex$fixtures[[1]])
       testthat::expect_true(all(vapply(ex$fixtures, function(f) identical(names(f), names(ex$inputs)), logical(1))))
@@ -21,6 +25,8 @@ testthat::test_that("the library covers every category and all templates have ru
       testthat::expect_true(grepl(ex$solution, ex$hints[4L], fixed = TRUE))
       testthat::expect_true(length(parse(text = ex$solution)) > 0)
     }
+    testthat::expect_length(unique(instructions), 3L)
+    testthat::expect_length(unique(solutions), 3L)
   }
 })
 
@@ -47,12 +53,14 @@ testthat::test_that("every reference passes its own checker on displayed and hid
     for (f in Sys.glob(file.path(root, "R", "exercises*.R"))) source(f, local = TRUE)
     source(file.path(root, "R", "worker.R"), local = TRUE)
     ids <- exercise_catalog()$id
-    vapply(ids, function(id) {
-      ex <- make_exercise(id, 771L, 3L)
+    variants <- expand.grid(id = ids, level = 1:3, stringsAsFactors = FALSE)
+    results <- vapply(seq_len(nrow(variants)), function(i) {
+      ex <- make_exercise(variants$id[i], 771L, variants$level[i])
       graded <- grade_submission(ex, ex$solution)
       if (identical(graded$status, "pass")) return("pass")
       paste(graded$status, paste(graded$checks$detail[!graded$checks$passed], collapse = " / "))
     }, "")
+    setNames(results, paste(variants$id, variants$level))
   }, args = list(root = getOption("rreps.root")), libpath = .libPaths())
   testthat::expect_true(all(results == "pass"), info = paste(names(results)[results != "pass"],
                                                               results[results != "pass"]))

@@ -70,6 +70,7 @@ rreps_ui <- function() {
             numericInput("speed_goal", "Speed target (seconds per repetition)", 90, 5, 3600)),
         selectInput("accent", "Accent palette", c("Sea glass" = "mint", "Glacier" = "blue", "Amber" = "amber")),
         checkboxInput("show_timer", "Show elapsed time in untimed modes", TRUE),
+        checkboxInput("disable_suggestions", "Disable in-app editor suggestions", TRUE),
         actionButton("save_prefs", "Save preferences", class = "btn-primary"))))
   )
 }

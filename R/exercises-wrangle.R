@@ -19,19 +19,27 @@ exercise_library_filtering <- function() {
     select_columns = exercise_template(category, "Select and order columns", 1, function(ctx, level) {
       cols <- sample(c(ctx$x, ctx$y, ctx$g, ctx$h, ctx$key), if (level >= 2L) 4L else 2L)
       keys <- paste(cols, collapse = ", ")
-      selection <- keys
-      rename <- ""
+      task <- sprintf("From df, return only these columns in this order: %s.", keys)
+      solution <- sprintf("df |> select(%s)", keys)
+      if (level >= 2L) {
+        task <- "From df, select only the columns listed in the supplied character vector keep, in the order given by keep."
+        solution <- "df |> select(all_of(keep))"
+      }
       if (level == 3L) {
-        rename <- sprintf(" Name the first output column primary_%s.", cols[1])
-        selection <- paste0("primary_", cols[1], " = ", keys)
+        task <- paste(task, "Prefix the first output column name with primary_.")
+        solution <- paste0(solution, ' |> rename_with(function(name) paste0("primary_", name), 1)')
       }
       exercise_plan(
-        sprintf("From df, return only these columns in this order: %s. Keep the row order.%s", keys, rename),
-        sprintf("df |> select(%s)", selection), "Choose variables without subsetting any rows.",
-        "Use select() with the names in the requested sequence.",
-        sprintf("df |> select(%s, ...)", cols[1]),
+        paste(task, "Keep the row order."),
+        solution, "Choose variables without subsetting any rows.",
+        if (level == 1L) "Use select() with the names in the requested sequence." else "Use all_of() to select columns using a character vector.",
+        if (level == 1L) sprintf("df |> select(%s, ...)", cols[1]) else "df |> select(all_of(...))",
         "The order of names supplied to select() becomes the order of output columns.",
-        exercise_table(TRUE, TRUE)
+        exercise_table(TRUE, TRUE), function(ctx, variant) {
+          data <- exercise_frame(ctx, variant)
+          if (level >= 2L) data$keep <- sample(names(data$df), sample(2:4, 1L))
+          data
+        }
       )
     }),
     arrange_rows = exercise_template(category, "Sort with tie breakers", 2, function(ctx, level) {

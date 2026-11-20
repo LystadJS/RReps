@@ -11,6 +11,11 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: '4.5.3'
+      - name: Cache the project R library
+        uses: actions/cache@v4
+        with:
+          path: .local-library
+          key: rreps-${{ runner.os }}-${{ runner.arch }}-r-4.5.3-${{ hashFiles('renv.lock') }}
       - name: Restore locked packages
         shell: pwsh
         run: ./scripts/start.ps1 scripts/setup.R

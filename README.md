@@ -37,7 +37,7 @@ The range is 5, 10, 20, 50, 100, or unlimited. A single drill stays on the same 
 
 | Mode | Practice behavior |
 | --- | --- |
-| Recall | Starts with an empty editor. In-app completion and suggestions are disabled. |
+| Recall | Starts with an empty editor. In-app keyword suggestions are disabled by default and can be toggled in Settings. |
 | Guided | Opens the conceptual hint. Reveal additional help at your pace. Guided passes count toward practice volume and accuracy. |
 | Speed | Counts down to your configurable per-repetition target. You can finish after the target expires and see the overrun alongside correctness. |
 | Mastery | Tracks a three-pass checkpoint within the session for each drill. New, unaided first passes build the streak. A miss or hint resets it. The long-term skill rating also requires later reviews. |
@@ -54,7 +54,7 @@ During a repetition, switch **Workspace** to **Positron**. The app shows the fol
 - Source the sibling `context.R` in the R console to load the displayed fixture and packages for interactive work. Keep setup and console experiments outside `answer.R`.
 - Save `answer.R` and click **Check answer** in the browser. RReps reads the saved file and uses the same subprocess and tests as the in-app editor. Unsaved IDE buffer changes are available after saving.
 
-Each repetition has its own folder under `practice/`. Retries and restarts reuse that folder. The active exercise, editor draft, hints, submissions, settings, and mastery history persist under `.state/`. These directories are Git-ignored. Close the app before copying both directories for a backup. Only project-local task configuration is required. In-app completion is disabled, while Positron uses your own editor preferences.
+Each repetition has its own folder under `practice/`. Retries and restarts reuse that folder. The active exercise, editor draft, hints, submissions, settings, and mastery history persist under `.state/`. These directories are Git-ignored. Close the app before copying both directories for a backup. Only project-local task configuration is required. Positron uses your own editor preferences.
 
 ## Review scheduling and measurement
 

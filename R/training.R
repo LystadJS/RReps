@@ -56,8 +56,9 @@ feedback_ui <- function(result, hints, passed, seconds, speed_goal, explanation)
     sprintf(" \u00b7 %s target by %.1f s", if (seconds <= speed_goal) "Under" else "Over", abs(speed_goal - seconds))
   div(class = paste("panel-card feedback", if (ok) "success" else "retry"),
     h3(unname(titles[result$status])),
-    p(class = "muted", sprintf("%d/%d checks passed \u00b7 %.2f s grading \u00b7 %.1f s to submit \u00b7 %d hints%s",
-      sum(checks$passed), nrow(checks), result$elapsed, seconds, hints, paste(speed, collapse = ""))),
+    p(class = "muted", sprintf("%d/%d checks passed \u00b7 %.2f s grading \u00b7 %.1f s to submit \u00b7 %d %s%s",
+      sum(checks$passed), nrow(checks), result$elapsed, seconds, hints,
+      if (hints == 1L) "hint" else "hints", paste(speed, collapse = ""))),
     if (ok) p(explanation) else p(paste(head(unique(failed$detail), 3L), collapse = " ")),
     tags$details(tags$summary("Test results"), tags$ul(class = "checklist",
       lapply(seq_len(nrow(checks)), function(i) tags$li(

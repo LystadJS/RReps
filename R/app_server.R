@@ -27,12 +27,19 @@ rreps_server <- function(input, output, session) {
       value = if (is.null(s)) "" else s$draft, passed = !is.null(s) && s$passed == 1L))
   }
   restore <- function() show_item(active_session(con))
+  set_completion <- function(disabled) {
+    shinyAce::updateAceEditor(session, "code", autoComplete = if (disabled) "disabled" else "enabled",
+                              autoCompleters = "keyword")
+  }
   session$onFlushed(function() {
     restore()
     updateNumericInput(session, "daily_goal", value = as.integer(pref("daily_goal", "20")))
     updateNumericInput(session, "speed_goal", value = goal_time())
     updateSelectInput(session, "accent", selected = pref("accent", "mint"))
     updateCheckboxInput(session, "show_timer", value = pref("show_timer", "yes") == "yes")
+    disabled <- pref("disable_suggestions", "yes") == "yes"
+    updateCheckboxInput(session, "disable_suggestions", value = disabled)
+    set_completion(disabled)
     session$sendCustomMessage("rr-accent", pref("accent", "mint"))
   }, once = TRUE)
 
@@ -109,7 +116,9 @@ rreps_server <- function(input, output, session) {
     }
     tagList(if (!nrow(row)) p("Beginner \u00b7 No graded attempts yet.") else
       tagList(strong(row$level), p(sprintf("%d independent first passes \u00b7 %d consecutive \u00b7 %d later review days",
-        row$unseen_successes, row$streak, row$retention_days))), checkpoint)
+        row$unseen_successes, row$streak, row$retention_days)),
+        p(class = "muted", paste("Next review", format(as.POSIXct(row$due_at, origin = "1970-01-01"),
+                                                        "%b %d at %H:%M", tz = "")))), checkpoint)
   })
   output$hint_text <- renderUI({
     s <- req(current())
@@ -199,6 +208,9 @@ rreps_server <- function(input, output, session) {
     set_setting(con, "speed_goal", input$speed_goal)
     set_setting(con, "show_timer", if (input$show_timer) "yes" else "no")
     set_setting(con, "accent", input$accent)
+    disabled <- isTRUE(input$disable_suggestions)
+    set_setting(con, "disable_suggestions", if (disabled) "yes" else "no")
+    set_completion(disabled)
     session$sendCustomMessage("rr-accent", input$accent)
     bump()
     showNotification("Preferences saved.", type = "message")
