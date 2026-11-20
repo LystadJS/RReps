@@ -37,4 +37,4 @@ testthat::test_that("editor preferences are local and restored", {
                       accent = "blue", disable_suggestions = TRUE, save_prefs = 1)
     testthat::expect_identical(get_setting(con, "disable_suggestions"), "yes")
   })
-}
+})
